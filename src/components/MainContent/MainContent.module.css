@@ -1,5 +1,6 @@
 .headerToolbar {
     gap: 4rem;
+    justify-content: space-between;
 }
 
 .searchButton {
@@ -11,6 +12,7 @@
     display: flex;
     align-items: stretch;
     flex: auto;
+    max-width: 600px;
 }
 
 .searchBar {
