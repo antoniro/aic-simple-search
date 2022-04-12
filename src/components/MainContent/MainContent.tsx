@@ -26,8 +26,6 @@ import ArtistDetails from '../ArtistDetails/ArtistDetails';
 
 import { fetchArtists } from '../../utils/apiServices/apiServices';
 
-
-
 function MainContent() {
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [previousSearchKeyword, setPreviousSearchKeyword] =
@@ -63,12 +61,12 @@ function MainContent() {
   }
 
   // TODO 2022-04-12 11:54:32 @antoniro
-  // There is tight coupling with structure of response. As such, If
+  // There is a tight coupling with the structure of response. If
   // the structure of the response sent by ACI changes, or if another
-  // api is used, it will break the component.
-  // apiServices should be expanded, or another service/helper should
-  // be created to digest responses and feed consistent to this component
-  // This is also applicable to other components
+  // api is used, it will potentially break the component.
+  // apiServices should be expanded, and/or another service/helper should
+  // be created to digest responses, abstract data into objects that can
+  // be used by this component. This is also applicable to other components
   function getArtists() {
     const artists = artistSearchResponse?.data.data.map((artist: any) => (
       <ListItem key={artist.id} disablePadding divider dense>
