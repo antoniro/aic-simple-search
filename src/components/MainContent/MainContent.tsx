@@ -40,7 +40,7 @@ function MainContent() {
 
   function onClickSearch() {
     console.log(previousSearchKeyword);
-    if (searchKeyword === '' || searchKeyword == previousSearchKeyword) return;
+    if (searchKeyword === '' || searchKeyword === previousSearchKeyword) return;
 
     setPreviousSearchKeyword(searchKeyword);
     setSelectedArtist(-1);
@@ -90,7 +90,7 @@ function MainContent() {
 
   function getSelectedArtistData() {
     return artistSearchResponse?.data.data.find(
-      (artist: any) => artist.id == selectedArtist
+      (artist: any) => artist.id === selectedArtist
     );
   }
 
@@ -133,7 +133,7 @@ function MainContent() {
         >
           {getArtists()}
         </List>
-        {selectedArtist != -1 ? (
+        {selectedArtist !== -1 ? (
           <ArtistDetails data={getSelectedArtistData()} />
         ) : (
           <EmptyComponent message='Select an artist to see details.' />
