@@ -1,21 +1,8 @@
-.header-toolbar {
-  gap: 4rem;
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-  border-radius: 1;
-  flex: auto;
-}
-
-.search-icon-container {
-  padding: 0 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-input {
-  color: 'inherit';
+html,
+body,
+#root,
+#root > div {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  height: 100%;
 }

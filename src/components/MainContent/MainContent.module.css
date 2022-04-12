@@ -1,0 +1,32 @@
+.headerToolbar {
+    gap: 4rem;
+}
+
+.searchButton {
+    border-radius: 0px 18px 18px 0px;
+    padding: 0px 1rem;
+}
+
+.searchBarContainer {
+    display: flex;
+    align-items: stretch;
+    flex: auto;
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    border-radius: 18px 0px 0px 18px;
+    flex: auto;
+}
+
+.searchIconContainer {
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.searchInput {
+    color: inherit
+}
