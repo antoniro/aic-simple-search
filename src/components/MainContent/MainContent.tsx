@@ -60,7 +60,7 @@ function MainContent() {
       });
   }
 
-  // TODO 2022-04-12 11:54:32 @antoniro
+  // TODO: 2022-04-12 11:54:32 @antoniro
   // There is a tight coupling with the structure of response. If
   // the structure of the response sent by ACI changes, or if another
   // api is used, it will potentially break the component.
@@ -68,6 +68,12 @@ function MainContent() {
   // be created to digest responses, abstract data into objects that can
   // be used by this component. This is also applicable to other components
   function getArtists() {
+    // NB: 2022-04-12 16:32:20 @antoniro
+    // There is currently a limit on the number of artists that can be
+    // fetched (see AIC API documentation). However, if the list was supposed
+    // to display a large number of artists, we could make use of pagination
+    // to show a small set of artists at a time, or use the react-window
+    // component. (https://github.com/bvaughn/react-window)
     const artists = artistSearchResponse?.data.data.map((artist: any) => (
       <ListItem key={artist.id} disablePadding divider dense>
         <ListItemButton
@@ -88,6 +94,8 @@ function MainContent() {
     );
   }
 
+  // TODO: 2022-04-12 16:28:21 @antoniro
+  // Consider moving search results into its own component.
   function showSearchResults() {
     if (fetchingData) {
       return <LoadingSpinner message='Searching artists...' />;
@@ -136,9 +144,16 @@ function MainContent() {
 
   return (
     <Stack sx={{ bgcolor: 'grey.200', flexGrow: 1 }}>
+      {/* TODO: 2022-04-12 17:06:23 @antoniro
+       * Consider moving app header and search bar into their own components */}
       <AppBar sx={{ bgcolor: 'common.black' }} position='static' elevation={0}>
         <Toolbar className={styles.headerToolbar}>
           <Typography variant='h6'>AIC Simple Search</Typography>
+          {/* TODO: 2022-04-12 16:17:47 @antoniro
+           * For the implementation of the search bar, a simple input and button
+           * were used for simplicity and time. However, it would be more appropriate
+           * to use an actual form element with the Controller component provided
+           * by react-hook-form. (https://react-hook-form.com/) */}
           <Box className={styles.searchBarContainer}>
             <Box
               sx={{
