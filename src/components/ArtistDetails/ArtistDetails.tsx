@@ -1,81 +1,85 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Container,
-  Stack,
-  Typography,
-  CircularProgress,
-  Box,
-} from '@mui/material';
+import { AxiosResponse } from 'axios';
+
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import Typography from '@mui/material/Typography';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import axios, { AxiosResponse } from 'axios';
 
 import styles from './ArtistDetails.module.css';
+
+import ErrorMessage from '../common/ErrorMessage';
+import EmptyComponent from '../common/EmptyComponent';
+import LoadingSpinner from '../common/LoadingSpinner';
+
+import { fetchArtworks } from '../../utils/apiServices/apiServices';
+import { getDateSpan } from '../../utils/helpers/helpers';
+
+
 
 type ArtistProps = {
   data: any;
 };
 
-const BASE_URL = 'https://api.artic.edu/api/v1';
-const ARTWORKS_ENDPOINT = '/artworks';
-const RELEVANT_ARTWORK_FIELDS = [
-  'id',
-  'title',
-  'thumbnail',
-  'date_display',
-  'place_of_origin',
-  'image_id',
-];
-const USER_AGENT = 'AIC Simple Search (anthony.gbegan@gmail.com)';
 const MAX_NUM_OF_ARTWORKS = 5;
 
 function ArtistDetails(artistProps: ArtistProps) {
   const [artistArtworksResponse, setArtistArtworksResponse] =
     useState<AxiosResponse>();
-  const [error, setError] = useState();
+  const [error, setError] = useState<boolean>(false);
   const [fetchingData, setFetchingData] = useState<boolean>(false);
 
   useEffect(() => {
-    searchArtworks();
+    getArtistArtworks();
   }, [artistProps.data]);
 
-  function searchArtworks() {
+  function getArtistArtworks() {
     setFetchingData(true);
+    setError(false);
 
     const artwork_ids = artistProps.data.artwork_ids.slice(
       0,
       MAX_NUM_OF_ARTWORKS
     );
 
-    axios
-      .get(`${BASE_URL}${ARTWORKS_ENDPOINT}?limit=5`, {
-        headers: {
-          'AIC-User-Agent': USER_AGENT,
-        },
-        params: {
-          params: {
-            fields: RELEVANT_ARTWORK_FIELDS.toString(),
-            ids: artwork_ids.toString(),
-          },
-        },
-      })
+    fetchArtworks(artwork_ids)
       .then((response) => {
         setArtistArtworksResponse(response);
         setFetchingData(false);
       })
       .catch((error) => {
         console.error('Error fetching data: ', error);
-        setError(error);
+        setError(true);
         setFetchingData(false);
       });
   }
 
-  function getArtworks() {
-    if(fetchingData) {
-      return getLoadingSpinner('Loading artworks...');
+  function showArtworks() {
+    if (fetchingData) {
+      return <LoadingSpinner message='Loading artworks...' />;
+    }
+
+    if (error) {
+      return (
+        <ErrorMessage message='Oops! There was an error while retrieving artworks :(' />
+      );
+    }
+
+    // TODO 2022-04-12 11:54:32 @antoniro
+    // There is tight coupling with structure of response. As such, If
+    // the structure of the response sent by ACI changes, or if another
+    // api is used, it will break the component.
+    // apiServices should be expanded, or another service/helper should
+    // be created to digest responses and feed consistent to this component
+    // This is also applicable to other components
+    if (artistArtworksResponse?.data.data.length < 1) {
+      return (
+        <EmptyComponent message={`This artist doesn't have any artworks.`} />
+      );
     }
 
     const artworks = artistArtworksResponse?.data.data.map((artwork: any) => {
@@ -89,7 +93,7 @@ function ArtistDetails(artistProps: ArtistProps) {
             <Typography>Time period: {artwork.date_display}</Typography>
             <Typography>Origin: {artwork.place_of_origin}</Typography>
             <Typography>Illustration:</Typography>
-            <img src={imgUrl} />
+            <img src={imgUrl} className={styles.artworkImage} />
           </AccordionDetails>
         </Accordion>
       );
@@ -98,45 +102,21 @@ function ArtistDetails(artistProps: ArtistProps) {
     return artworks;
   }
 
-  function getDateSpan() {
-    let dateSpan = '';
-
-    if (artistProps.data.birth_date != null) {
-      dateSpan =
-        artistProps.data.death_date != null
-          ? `(${artistProps.data.birth_date} - ${artistProps.data.death_date})`
-          : `(${artistProps.data.birth_date})`;
-    }
-
-    return dateSpan;
-  }
-
-  function getLoadingSpinner(message: string) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexGrow: 1,
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4rem 0rem',
-          gap: '1rem',
-        }}
-      >
-        <CircularProgress />
-        <Typography>{message}</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Container sx={{ width: '100%', flexShrink: 1 }}>
       <Stack sx={{ margin: 2, alignItems: 'center' }}>
-        <Typography textAlign='center' variant='h6'>{artistProps.data.title}</Typography>
-        <Typography textAlign='center' variant='subtitle2'>{getDateSpan()}</Typography>
+        <Typography textAlign='center' variant='h6'>
+          {artistProps.data.title}
+        </Typography>
+        <Typography textAlign='center' variant='subtitle2'>
+          {getDateSpan(
+            artistProps.data.birth_date,
+            artistProps.data.death_date
+          )}
+        </Typography>
       </Stack>
 
-      <div className={styles.artworkList}>{getArtworks()}</div>
+      <div>{showArtworks()}</div>
     </Container>
   );
 }

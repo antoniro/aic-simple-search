@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 
-import { alpha, useTheme } from '@mui/material/styles';
+import { AxiosResponse } from 'axios';
+
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -8,98 +15,66 @@ import InputBase from '@mui/material/InputBase';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import SearchIcon from '@mui/icons-material/Search';
+import { alpha, useTheme } from '@mui/material/styles';
 
-import axios, { AxiosResponse } from 'axios';
-
-import {
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  CircularProgress,
-} from '@mui/material';
 import styles from './MainContent.module.css';
 
+import ErrorMessage from '../common/ErrorMessage';
+import EmptyComponent from '../common/EmptyComponent';
+import LoadingSpinner from '../common/LoadingSpinner';
 import ArtistDetails from '../ArtistDetails/ArtistDetails';
 
-const BASE_URL = 'https://api.artic.edu/api/v1';
-const AGENTS_ENDPOINT = '/agents';
-const AGENTS_SEARCH_ENDPOINT = `${AGENTS_ENDPOINT}/search`;
-const RELEVANT_AGENT_FIELDS = [
-  'id',
-  'title',
-  'birth_date',
-  'death_date',
-  'description',
-  'is_artist',
-  'agent_type_title',
-  'agent_type_id',
-  'artwork_ids',
-];
-const USER_AGENT = 'AIC Simple Search (anthony.gbegan@gmail.com)';
+import { fetchArtists } from '../../utils/apiServices/apiServices';
+
+
 
 function MainContent() {
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [previousSearchQuery, setPreviousSearchQuery] = useState<string>('');
-  const [artistSearchResponse, setArtistSearchResponse] = useState<AxiosResponse>();
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [previousSearchKeyword, setPreviousSearchKeyword] =
+    useState<string>('');
+  const [artistSearchResponse, setArtistSearchResponse] =
+    useState<AxiosResponse>();
   const [fetchingData, setFetchingData] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
   const [selectedArtist, setSelectedArtist] = React.useState<number>(-1);
 
   const theme = useTheme();
 
-  function onArtistClick(index: number) {
-    setSelectedArtist(index);
-  }
-
   function onClickSearch() {
-    if (searchQuery === '' || searchQuery == previousSearchQuery) return;
+    console.log(previousSearchKeyword);
+    if (searchKeyword === '' || searchKeyword == previousSearchKeyword) return;
 
-    setPreviousSearchQuery(searchQuery);
+    setPreviousSearchKeyword(searchKeyword);
     setSelectedArtist(-1);
 
-    searchArtist(searchQuery);
-  }
-
-  function searchArtist(query: string) {
     setFetchingData(true);
+    setError(false);
 
-    axios
-      .get(
-        `${BASE_URL}${AGENTS_SEARCH_ENDPOINT}?fields=${RELEVANT_AGENT_FIELDS.toString()}`,
-        {
-          headers: {
-            'AIC-User-Agent': USER_AGENT,
-          },
-          params: {
-            params: {
-              q: query,
-              query: {
-                term: {
-                  is_artist: true,
-                },
-              },
-            },
-          },
-        }
-      )
+    fetchArtists(searchKeyword)
       .then((response) => {
         setArtistSearchResponse(response);
         setFetchingData(false);
       })
-      .catch((error) => {
-        console.error('Error fetching data: ', error);
+      .catch(() => {
+        setError(true);
+        setPreviousSearchKeyword('');
         setFetchingData(false);
       });
   }
 
+  // TODO 2022-04-12 11:54:32 @antoniro
+  // There is tight coupling with structure of response. As such, If
+  // the structure of the response sent by ACI changes, or if another
+  // api is used, it will break the component.
+  // apiServices should be expanded, or another service/helper should
+  // be created to digest responses and feed consistent to this component
+  // This is also applicable to other components
   function getArtists() {
     const artists = artistSearchResponse?.data.data.map((artist: any) => (
       <ListItem key={artist.id} disablePadding divider dense>
         <ListItemButton
           selected={selectedArtist === artist.id}
-          onClick={() => onArtistClick(artist.id)}
+          onClick={() => setSelectedArtist(artist.id)}
         >
           <ListItemText primary={artist.title} />
         </ListItemButton>
@@ -115,47 +90,25 @@ function MainContent() {
     );
   }
 
-  function getLoadingSpinner(message: string) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexGrow: 1,
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4rem 0rem',
-          gap: '1rem',
-        }}
-      >
-        <CircularProgress />
-        <Typography>{message}</Typography>
-      </Box>
-    );
-  }
-
   function showSearchResults() {
     if (fetchingData) {
-      return getLoadingSpinner('Searching artists...');
+      return <LoadingSpinner message='Searching artists...' />;
+    }
+
+    if (error) {
+      return (
+        <ErrorMessage message='Oops! There was an error while fetching data :(' />
+      );
     }
 
     if (artistSearchResponse == null) {
       return (
-        <Typography
-          sx={{ padding: '4rem 0rem', flexGrow: 1, textAlign: 'center' }}
-        >
-          Please search for artists using search field above.
-        </Typography>
+        <EmptyComponent message='Please search for artists using search field above.' />
       );
     }
 
     if (artistSearchResponse?.data.pagination.total < 1) {
-      return (
-        <Typography
-          sx={{ padding: '4rem 0rem', flexGrow: 1, textAlign: 'center' }}
-        >
-          No results were found :(
-        </Typography>
-      );
+      return <EmptyComponent message='No results were found :(' />;
     }
 
     return (
@@ -177,11 +130,7 @@ function MainContent() {
         {selectedArtist != -1 ? (
           <ArtistDetails data={getSelectedArtistData()} />
         ) : (
-          <Typography
-            sx={{ padding: '4rem 0rem', flexGrow: 1, textAlign: 'center' }}
-          >
-            Select an artist to see details.
-          </Typography>
+          <EmptyComponent message='Select an artist to see details.' />
         )}
       </Stack>
     );
@@ -210,8 +159,11 @@ function MainContent() {
                 fullWidth
                 placeholder='Search Artist...'
                 className={styles.searchInput}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onClickSearch();
+                }}
               />
             </Box>
             <Button

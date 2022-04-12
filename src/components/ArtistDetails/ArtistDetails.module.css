@@ -1,5 +1,3 @@
-.artworkList {
-    /* max-width: '100%'; */
+.artworkImage {
+  max-width: 100%;
 }
-
-img {max-width:100%;}
