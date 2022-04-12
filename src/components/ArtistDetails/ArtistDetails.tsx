@@ -110,8 +110,8 @@ function ArtistDetails(artistProps: ArtistProps) {
         </Typography>
         <Typography textAlign='center' variant='subtitle2'>
           {getDateSpan(
-            artistProps.data.birth_date,
-            artistProps.data.death_date
+            artistProps.data.birth_date ?? '',
+            artistProps.data.death_date ?? ''
           )}
         </Typography>
       </Stack>
