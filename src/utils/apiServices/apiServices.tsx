@@ -30,7 +30,7 @@ const USER_AGENT = 'AIC Simple Search (anthony.gbegan@gmail.com)';
 export function fetchArtists(keyword: string) {
   return axios
     .get(
-      `${BASE_URL}${AGENTS_SEARCH_ENDPOINT}?fields=${RELEVANT_AGENT_FIELDS.toString()}`,
+      `${BASE_URL}${AGENTS_SEARCH_ENDPOINT}`,
       {
         headers: {
           'AIC-User-Agent': USER_AGENT,
@@ -38,6 +38,7 @@ export function fetchArtists(keyword: string) {
         params: {
           params: {
             q: keyword,
+            fields: RELEVANT_AGENT_FIELDS.toString(),
             query: {
               term: {
                 is_artist: true,
