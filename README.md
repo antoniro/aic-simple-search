@@ -1,6 +1,6 @@
 # AIC Simple Search
 
-This is a basic react app that allows the user to search for artists and their artworks using the API provided by the Art Institute of Chicago API.
+This is a basic react app that allows the user to search for artists and their artworks using the API provided by the Art Institute of Chicago.
 
 The project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
