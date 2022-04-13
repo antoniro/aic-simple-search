@@ -34,10 +34,6 @@ function ArtistDetails(artistProps: ArtistProps) {
   const [fetchingData, setFetchingData] = useState<boolean>(false);
 
   useEffect(() => {
-    getArtistArtworks();
-  }, [artistProps.data]);
-
-  function getArtistArtworks() {
     setFetchingData(true);
     setError(false);
 
@@ -56,7 +52,7 @@ function ArtistDetails(artistProps: ArtistProps) {
         setError(true);
         setFetchingData(false);
       });
-  }
+  }, [artistProps.data]);
 
   function showArtworks() {
     if (fetchingData) {
@@ -93,7 +89,7 @@ function ArtistDetails(artistProps: ArtistProps) {
             <Typography>Time period: {artwork.date_display}</Typography>
             <Typography>Origin: {artwork.place_of_origin}</Typography>
             <Typography>Illustration:</Typography>
-            <img src={imgUrl} className={styles.artworkImage} />
+            <img src={imgUrl} alt={`Illustration for ${artwork.title}`} className={styles.artworkImage} />
           </AccordionDetails>
         </Accordion>
       );
