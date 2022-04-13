@@ -6,7 +6,7 @@ The project was bootstrapped with [Create React App](https://github.com/facebook
 
 ## How to run the app
 ### Netlify
-The latest build of the application is automatically deployed on Netlify and can be accessed via the following link: https://aic-simple-search.netlify.app/
+The latest build of the application is automatically deployed on Netlify and can be accessed via the following link: [https://aic-simple-search.netlify.app/](https://aic-simple-search.netlify.app/)
 
 ### Local deployment
 
